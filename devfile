@@ -1,0 +1,66 @@
+apiVersion: 2.0.0
+metadata:
+  name: javascript-node-20-devfile
+  version: 1.0.0
+  displayName: JavaScript Node.js 20 Development Environment
+  description: A devfile for JavaScript and Node.js development using version 20
+
+components:
+  - name: nodejs-container
+    container:
+      image: mcr.microsoft.com/devcontainers/javascript-node:20
+      memoryLimit: 8Gi
+      mountSources: true
+      ports:
+        - containerPort: 3000
+          protocol: TCP
+          exposure: public
+      commands:
+        - id: update-content
+          exec:
+            commandLine: yarn
+            component: nodejs-container
+        - id: post-create
+          exec:
+            commandLine: ""
+            component: nodejs-container
+        - id: post-attach
+          exec:
+            commandLine: yarn dev
+            component: nodejs-container
+
+  - name: vscode-extensions
+    custom:
+      extensions:
+        - name: dbaeumer.vscode-eslint
+        - name: esbenp.prettier-vscode
+
+  - name: vscode-settings
+    custom:
+      settings:
+        editor.formatOnSave: true
+
+  - name: codespaces-setup
+    custom:
+      openFiles:
+        - data/blog/code-sample.mdx
+
+commands:
+  - id: start-dev-server
+    exec:
+      commandLine: yarn dev
+      component: nodejs-container
+  - id: update
+    exec:
+      commandLine: yarn
+      component: nodejs-container
+
+ports:
+  - port: 3000
+    exposure: public
+    description: Next.js server
+
+events:
+  postStart:
+    - command: update
+    - command: start-dev-server
